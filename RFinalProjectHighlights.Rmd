@@ -1,0 +1,88 @@
+---
+title: "R Final Project Highlights"
+output: html_notebook
+---
+Math 23c R Final Project Highlights
+
+Authors: Vincent Li, Karen Chen, Anna Lou
+
+
+Hello! In these highlights, we will examine housing sale data from Brooklyn, NY in the years 2003-2017. Our dataset was downloaded from Kaggle (https://www.kaggle.com/tianhwu/brooklynhomes2003to2017) and contains over 300,000 rows and 100 columns. In our project, we analyze the columns corresponding to sale price, gross area (in sq ft), year sold, date sold, school district, and zip code.
+
+Make sure to run the R Script file "RFinalProject.R" before running this file because these highlights depend on variables and packages defined in the R Script.
+
+
+```{r}
+HousingSaleYears <- ggplot(Brook,
+                           aes(x=year_of_sale))+
+  geom_bar(fill="light green")
+print(HousingSaleYears + labs(title="Housing Sale Years in Brooklyn, NY from 2003-2017", x="Year", y="Number of Houses Sold"))
+```
+
+The number of houses sold was at a high point in 2004, prior to the Housing Bubble bursting to precipitate the Great Recession 2007-2008. However, the number of sales started to decline in 2005 and declined more quickly as the bubble burst. The number of housing sales has begun to recover in recent years, but the number has yet to reach its peak in 2004. It appears that the number of houses sold is leveling off, which may suggest that less people are looking for houses to buy or that more people are settled in to Brooklyn.
+
+```{r}
+hist(GrossSqft/1000, probability=TRUE, col=rainbow(30),
+     main="Gross Area Distribution of Houses in Brooklyn from 1000 to 10000 Sq Ft",
+     xlab="Gross Sq Ft Divided by 1000",
+     ylab="Probability Density")
+fit <- fitdistr(GrossSqft/1000,"gamma")
+shape <- fit[1]$estimate[1]
+rate <- fit[1]$estimate[2]
+curve(dgamma(x,shape=shape,rate=rate), col = "black", from=0, to=10, add=TRUE)
+```
+
+Plotting the gross sq ft of houses sold in Brooklyn reveals that the distribution is approximately gamma, with most houses being around 1500 sq ft to 2500 sq ft. This is not too surprising, as houses sold in Brooklyn are probably mostly apartments, due to Brooklyn being a borough of New York City. What is surpising is that the gamma distribution is a pretty good fit for the gross area distribution. Gamma distributions have been used to model insurance claims and rainfall because these events are aggregated. Thus, this analysis may suggest that there is some accumulation or aggregation occurring with houses being sold.
+
+```{r}
+plot(0, pch=".", cex=3, xlim=c(min,max), ylim=c(1000,4000), col="red", xaxt="n",
+     main="Houses Sold Per Month Before and After June 2009", xlab="Month", ylab="Houses Sold")
+axis(1, at=c(1:5)*1e8+1e9, labels=c("Jan 2005","Feb 2008","Apr 2011","June 2014","Aug 2017"))
+
+# Plot houses sold per month + regression line before lowest point (June 2009)
+count_houses(month, min, d2009, "red"); clip(min, max, 1000, 4000)
+# Plot houses sold per month + regression line after lowest point (June 2009)
+count_houses(month, d2009, max, "blue"); clip(min, max, 1000, 4000)
+```
+
+Applying linear regression to the number of houses sold before and after June 2009, which was during the acute phase of the Great Recession, reveals that there was a steady decline in number of houses sold before June 2009 and there was a steady increase in houses sold afterward. This demonstrates that the number of houses sold was correlated with the phases of the Great Recession and thus confirms that the housing bubble bursting corresponds closely to the Great Recession. Moreover, the data shows that the number of houses sold had already been in decline for several years prior to the Great Recession, which suggests that the rising housing prices of the bubble may have begun to turn away potential buyers years before the actual burst of the bubble. Thus, the bubble did not burst all of a sudden, but rather it was slowly losing air and volume as housing prices increased over the years before 2008.
+
+```{r}
+AvgPriceSqFtPlot <- ggplot(df, aes(x=Year,y=avgPricePerSqFt)) + geom_point()
+
+print(AvgPriceSqFtPlot + labs(
+  title="Average Price Per Square Foot for Brooklyn House Sales From 2003-2017",
+  x="Years since 2003",
+  y="Average Price Per Square Foot ($)"))
+```
+
+In this scatter plot, we see that on average, housing prices (measured as average prife per sq ft based on gross area) in Brooklyn were rising from 2003 until 2007 and then they began declining after the bubble burst around 2008. However, the decline is not very sharp. In fact, after a few years of approximately stagnant prices, prices began growing rapidly in 2013. It appears that if prices are continuing their rapid, increasing rate of growth, we may be heading toward another bubble.
+
+```{r}
+AvgPriceSqFtPlot <- ggplot(df, aes(x=Year,y=avgPricePerSqFt)) + geom_point() + stat_smooth(method="lm",
+                                                                                           se=TRUE,
+                                                                                           fill=NA,
+                                                                                           formula=y ~ poly(x, 5, raw=TRUE),
+                                                                                           colour="red")
+print(AvgPriceSqFtPlot + labs(
+  title="Average Price Per Square Foot for Brooklyn House Sales From 2003-2017",
+  x="Year",
+  y="Average Price Per Square Foot ($)"))
+```
+
+Interestingly, a quintic polynomial regression fits the housing price data quite well. However, we would need more data and models to make more accurate predictions about the trajectory of housing prices in coming years.
+
+```{r}
+DFPlot <- ggplot(DF,
+       aes(x=Year,
+           y=Average,
+           color=SchoolDistrict))+
+  geom_point()
+print(DFPlot + labs(title="Avg Sale Prices of Houses Based on Year and School District", x="Year", y="Average Sale Price ($)"))
+
+```
+
+The data appears to show that housing prices are becoming more widely distributed in recent years. There was an overall drop in housing prices after the housing bubble burst in 2007-2008, but housing prices have all begun to rise recently. Analyzing prices by school district reveals that the rising prices are not only driven by a single area but rather that prices are rising across the board, across all school districts. Interestingly, the school districts with the lowest prices seem to have prices increasing the least, whereas the most expensive school districts have housing prices growing at increasing rates. This widening housing price gap may suggest increasing economic disparity across school districts, as affluent neighborhoods attract the wealthy of New York City and less affluent areas are paid less attention. This raises several ethical questions, including whether school districts with lower housing prices are being neglected due to poorer education or lack of resources that more affluent school districts have. Policymakers may use this data to determine which school districts may need the most aid, as housing prices can potentially reflect the state of education and the state of wellbeing in a certain neighborhood. Ultimately, the data reveals interesting trends that may or may not be rationally justified. Exploring effects of policy on these trends may reveal more about how they arise and how we can use them to improve our society.
+
+And that wraps up the highlights of our R Final Project! Thanks for reading through to the end!
+
